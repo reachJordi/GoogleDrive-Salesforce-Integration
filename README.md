@@ -1,18 +1,47 @@
-# Salesforce DX Project: Next Steps
+# Google Drive Salesforce Integration  
 
-Now that you’ve created a Salesforce DX project, what’s next? Here are some documentation resources to get you started.
+This integration enables seamless file transfers from Salesforce to Google Drive.  
 
-## How Do You Plan to Deploy Your Changes?
+## Google Drive API Setup  
 
-Do you want to deploy a set of changes, or create a self-contained application? Choose a [development model](https://developer.salesforce.com/tools/vscode/en/user-guide/development-models).
+### 1. Create a Google Project  
+- Navigate to **API & Services** → **Enable APIs and Services**  
+- Search for **Google Drive API** and enable it  
 
-## Configure Your Salesforce DX Project
+### 2. Generate API Credentials  
+- Go to **API & Services** → **Credentials** → **Create Credentials** → **OAuth client ID**  
+- Save the **Client ID** and **Client Secret**  
 
-The `sfdx-project.json` file contains useful configuration information for your project. See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm) in the _Salesforce DX Developer Guide_ for details about this file.
+## Salesforce Setup  
 
-## Read All About It
+- Create an Auth. Provider for your Salesforce org
+  - Navigate to **Setup** → **Identity** → **Auth. Providers
+  - Click **New**  
+  - Fill in the required fields and click **Save**
+    - **Name: Add your Auth. Provider name
+    - **URL Suffix: Add URL Suffix
+    - **Consumer Key:** `Client ID from Google Drive API`
+    - **Consumer Secret:** `Client Secret from Google Drive API`
+    - **Authorize Endpoint URL:** `https://accounts.google.com/o/oauth2/auth?access_type=offline&approval_prompt=force`
+    - **Token Endpoint URL:** `https://accounts.google.com/o/oauth2/token`
+    - **Default Scope:** `openid email profile https://www.googleapis.com/auth/drive`
 
-- [Salesforce Extensions Documentation](https://developer.salesforce.com/tools/vscode/)
-- [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
-- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_intro.htm)
-- [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm)
+- Create a Named Credential for your Salesforce org
+  - Navigate to **Setup** → **Security** → **Named Credentials**  
+  - Click **New Legacy**  
+  - Fill in the required fields and click **Save**  
+    - **Name:** Add your Named Credential name
+    - **URL:** `https://www.googleapis.com`
+    - **Identity Type:** `Named Principal`
+    - **Authentication Protocol:** `OAuth 2.0`
+    - **Authentication Provider:** Add your Auth.Provider
+    - **Scope:** `openid https://www.googleapis.com/auth/drive`
+    - **Start Authentication Flow on Save:** `Checked`
+
+
+## Usage  
+
+To use this integration, create a custom field on the **Account** object:  
+- **Field Name:** `SendToGoogleDrive__c`  
+
+Once set up, this field will allow users to send files directly from Salesforce to Google Drive.  
