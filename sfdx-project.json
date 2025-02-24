@@ -1,0 +1,12 @@
+{
+  "packageDirectories": [
+    {
+      "path": "force-app",
+      "default": true
+    }
+  ],
+  "name": "Google-drive",
+  "namespace": "",
+  "sfdcLoginUrl": "https://brave-hawk-1dt0q7-dev-ed.trailblaze.lightning.force.com/",
+  "sourceApiVersion": "63.0"
+}
