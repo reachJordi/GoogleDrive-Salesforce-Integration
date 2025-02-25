@@ -2,13 +2,16 @@ global class GoogleDriveSendFileBatch implements Database.Batchable<sObject>, Da
     
     private Map<Id, String> recordsFromFirstBatchMap;
     private List<Id> recordsFromFirstBatch;
+    private List<Account> accountsToUpdate;
     
-    global GoogleDriveSendFileBatch(Map<Id, String> records) {
+    global GoogleDriveSendFileBatch(Map<Id, String> records, List<Account> accountsToUpdate) {
         this.recordsFromFirstBatchMap = records;
         this.recordsFromFirstBatch = new List<Id>(records.keySet());
+        this.accountsToUpdate = accountsToUpdate;
     }
     
     global List<sObject> start(Database.BatchableContext BC) {
+        System.debug('*** recordsFromFirstBatch: ' + recordsFromFirstBatch);
         return [SELECT Id FROM Account WHERE Id IN :recordsFromFirstBatch];
     }
 
@@ -24,6 +27,8 @@ global class GoogleDriveSendFileBatch implements Database.Batchable<sObject>, Da
             WHERE LinkedEntityId IN :accIds
         ];
         
+        System.debug('*** links: ' + links);
+        
         Map<Id, List<ContentDocumentLink>> accountLinksMap = new Map<Id, List<ContentDocumentLink>>();
         
         for (ContentDocumentLink link : links) {
@@ -34,10 +39,15 @@ global class GoogleDriveSendFileBatch implements Database.Batchable<sObject>, Da
             accountLinksMap.get(link.LinkedEntityId).add(link);
         }
         
+        System.debug('*** accountLinksMap: ' + accountLinksMap);
         System.enqueueJob(new GoogleDriveQueueableFileUploader(accountLinksMap, this.recordsFromFirstBatchMap));
     }
     
     global void finish(Database.BatchableContext BC) {
-        
+        System.debug('Accounts to update: ' + accountsToUpdate.size());
+        if(!accountsToUpdate.isEmpty()) {
+            System.debug('**** updating accounts');
+            Database.update(accountsToUpdate, false);
+        }
     }
 }

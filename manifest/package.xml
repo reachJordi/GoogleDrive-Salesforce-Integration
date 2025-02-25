@@ -14,6 +14,7 @@
     </types>
     <types>
         <members>Account.SendToGoogleDrive__c</members>
+        <members>Account.GoogleDriveFolderId__c</members>
         <name>CustomField</name>
     </types>
     <version>63.0</version>
