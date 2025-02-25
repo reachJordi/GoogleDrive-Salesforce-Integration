@@ -38,6 +38,11 @@ public class FileUploader {
             //uploadtoGDrive(file_name, EncodingUtil.base64Decode(base64File), cVersion.Id, endpoint2, folderId);
             uploadtoGDrive(file_name, EncodingUtil.base64Decode(base64File), cVersion.Id, endpoint2, cVersion.VersionData, metadata, mimeType);
         }
+
+        // we need to delete ContentDocument instead
+        if(!cdlList.isEmpty()) {
+            Database.delete(cdlList, false);
+        }
     }
     
     @future(callout=true)
