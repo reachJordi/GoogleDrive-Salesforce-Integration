@@ -1,0 +1,18 @@
+<template>
+    <lightning-card title="Google Drive Files">
+        <template if:true={files.length}>
+            <ul class="slds-has-dividers_bottom-space">
+                <template for:each={files} for:item="file">
+                    {file.name}
+                    <li key={file.id} class="slds-item">
+                        <lightning-icon icon-name="doctype:gdoc" size="small"></lightning-icon>
+                        <a href={file.webViewLink} target="_blank">{file.name}</a>
+                    </li>
+                </template>
+            </ul>
+        </template>
+        <template if:false={files.length}>
+            <p>No files found in the specified folder.</p>
+        </template>
+    </lightning-card>
+</template>
