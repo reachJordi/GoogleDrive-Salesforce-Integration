@@ -30,7 +30,7 @@ public class GoogleDrive {
         // For simplicity, this example does not include authentication details
         HttpRequest req = new HttpRequest();
         req.setMethod('GET');
-        req.setEndpoint('callout:Google_Drive/drive/v3/files?q=\'' + folderId + '\'+in+parents+and+trashed=false');
+        req.setEndpoint('callout:Google_Drive/drive/v3/files?q=\'' + folderId + '\'+in+parents+and+trashed=false&fields=files(id,name,webViewLink)');
         
         Http http = new Http();
         HttpResponse res = http.send(req);
