@@ -6,6 +6,10 @@ export default class GoogleDriveFolderViewer extends LightningElement {
     @api recordId;
     @api folderId;
     files = [];
+    displayFiles = [];
+    currentPage = 1;
+    recordsPerPage = 3;
+    totalPages = 0;
 
     @wire(getRecord, { recordId: '$recordId', fields: ['Account.GoogleDriveFolderId__c'] })
     wiredRecord({ error, data }) {
@@ -23,10 +27,47 @@ export default class GoogleDriveFolderViewer extends LightningElement {
             .then(result => {
                 console.log('**** Files: ' + JSON.stringify(result));
                 this.files = JSON.parse(result);
+                this.calculatePages();
+                this.displayFilesForCurrentPage();
             })
             .catch(error => {
                 console.error('Error loading files', error);
             });
-        
+    }
+
+    calculatePages() {
+        this.totalPages = Math.ceil(this.files.length / this.recordsPerPage);
+    }
+
+    displayFilesForCurrentPage() {
+        const start = (this.currentPage - 1) * this.recordsPerPage;
+        const end = start + this.recordsPerPage;
+        this.displayFiles = this.files.slice(start, end);
+    }
+
+    handlePreviousPage() {
+        if (this.currentPage > 1) {
+            this.currentPage--;
+            this.displayFilesForCurrentPage();
+        }
+    }
+
+    handleNextPage() {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage++;
+            this.displayFilesForCurrentPage();
+        }
+    }
+
+    get avoidPaginationButtons() {
+        return this.totalPages < 2;
+    }
+
+    get showPreviousButton() {
+        return this.currentPage != 1;
+    }
+
+    get showNextButton() {
+        return this.currentPage != this.totalPages;
     }
 }
