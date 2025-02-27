@@ -24,10 +24,7 @@ public class GoogleDrive {
     // Method to fetch Google Drive files
     @AuraEnabled(Cacheable=true)
     public static String getGoogleDriveFiles(String folderId) {
-        // Implement logic to fetch files from Google Drive using the provided folderId
-        // This will involve making an HTTP request to the Google Drive API
-        // You need to handle authentication (OAuth 2.0) and error handling
-        // For simplicity, this example does not include authentication details
+        
         HttpRequest req = new HttpRequest();
         req.setMethod('GET');
         req.setEndpoint('callout:Google_Drive/drive/v3/files?q=\'' + folderId + '\'+in+parents+and+trashed=false&fields=files(id,name,webViewLink)');
@@ -53,6 +50,23 @@ public class GoogleDrive {
             return JSON.serialize(files);
         } else {
             return 'Error: ' + res.getStatusCode();
+        }
+    }
+
+    @AuraEnabled
+    public static void deleteGoogleDriveFile(String fileId) {
+        
+        Http http = new Http();
+        HttpRequest req = new HttpRequest();
+        req.setMethod('DELETE');
+        req.setEndpoint('callout:Google_Drive/drive/v3/files/' + fileId);
+        req.setHeader('Content-Type', 'application/json');
+        
+        HttpResponse res = http.send(req);
+        if (res.getStatusCode() == 204) {
+            System.debug('File deleted successfully');
+        } else {
+            System.debug('Error deleting file: ' + res.getBody());
         }
     }
 }

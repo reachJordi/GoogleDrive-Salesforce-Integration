@@ -1,6 +1,7 @@
 import { LightningElement, api, wire } from 'lwc';
 import { getRecord } from 'lightning/uiRecordApi';
 import getGoogleDriveFiles from '@salesforce/apex/GoogleDrive.getGoogleDriveFiles';
+import deleteGoogleDriveFile from '@salesforce/apex/GoogleDrive.deleteGoogleDriveFile';
 
 export default class GoogleDriveFolderViewer extends LightningElement {
     @api recordId;
@@ -32,6 +33,18 @@ export default class GoogleDriveFolderViewer extends LightningElement {
             })
             .catch(error => {
                 console.error('Error loading files', error);
+            });
+    }
+
+    handleDeleteFile(event) {
+        const fileId = event.target.dataset.fileId;
+        deleteGoogleDriveFile({ fileId: fileId })
+            .then(() => {
+                console.log('File deleted successfully');
+                this.loadFiles(); // Refresh the file list
+            })
+            .catch(error => {
+                console.error('Error deleting file', error);
             });
     }
 

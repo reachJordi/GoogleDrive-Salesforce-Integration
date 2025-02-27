@@ -12,7 +12,13 @@
                         <tr key={file.id}>
                             <td style="padding: 5px">
                                 <lightning-icon icon-name="doctype:gdoc" size="medium"></lightning-icon>
-                                <a href={file.webViewLink} target="_blank">{file.name}</a>
+                                <a href={file.webViewLink} target="_blank" style="padding-right: 5px">{file.name}</a>
+                                <button 
+                                    class="slds-button slds-button_destructive" 
+                                    onclick={handleDeleteFile} 
+                                    data-file-id={file.id}>
+                                    Delete
+                                </button>
                             </td>
                         </tr>
                     </template>
