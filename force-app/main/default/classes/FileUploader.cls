@@ -7,6 +7,9 @@
 
 public class FileUploader {
     public static void handleUpload(List<ContentDocumentLink> cdlList, String folderId) {
+
+        List<ContentDocument> cDocList = new List<ContentDocument>();
+
         for(ContentDocumentLink cdlItem: cdlList) {
             ContentDocumentLink cdl = [SELECT Id, ContentDocument.ContentSize, ContentDocument.FileExtension, ContentDocument.FileType,
                                        ContentDocument.LatestPublishedVersion.Id, ContentDocument.LatestPublishedVersion.Title,
@@ -15,6 +18,9 @@ public class FileUploader {
                                        FROM ContentDocumentLink WHERE Id =: cdlItem.Id];
             
             ContentDocument cDoc = cdl.ContentDocument;
+
+            cDocList.add(cDoc);
+
             // File size restricted 11 MB. You can add other conditions, like verifying the fileTypes with cDoc.FileExtension
             if(cDoc.ContentSize < 200 || cDoc.ContentSize > 11534336 || cDoc.FileType == 'SNOTE') {
                 continue;
@@ -39,9 +45,12 @@ public class FileUploader {
             uploadtoGDrive(file_name, EncodingUtil.base64Decode(base64File), cVersion.Id, endpoint2, cVersion.VersionData, metadata, mimeType);
         }
 
-        // we need to delete ContentDocument instead
         if(!cdlList.isEmpty()) {
             Database.delete(cdlList, false);
+        }
+
+        if(!cDocList.isEmpty()) {
+            Database.delete(cDocList, false);
         }
     }
     
