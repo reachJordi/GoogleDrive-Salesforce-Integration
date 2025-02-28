@@ -2,47 +2,48 @@ global class GoogleDriveSendFileBatch implements Database.Batchable<sObject>, Da
     
     private Map<Id, String> recordsFromFirstBatchMap;
     private List<Id> recordsFromFirstBatch;
-    private List<Account> accountsToUpdate;
+    private List<SObject> recordsToUpdate;
     
-    global GoogleDriveSendFileBatch(Map<Id, String> records, List<Account> accountsToUpdate) {
+    global GoogleDriveSendFileBatch(Map<Id, String> records, List<SObject> recordsToUpdate) {
         this.recordsFromFirstBatchMap = records;
         this.recordsFromFirstBatch = new List<Id>(records.keySet());
-        this.accountsToUpdate = accountsToUpdate;
+        this.recordsToUpdate = recordsToUpdate;
     }
     
     global List<sObject> start(Database.BatchableContext BC) {
-        return [SELECT Id FROM Account WHERE Id IN :recordsFromFirstBatch];
+        String sObjectType = recordsFromFirstBatch[0].getSObjectType().getDescribe().getName();
+        return Database.query('SELECT Id FROM ' + sObjectType + ' WHERE Id IN :recordsFromFirstBatch');
     }
 
     global void execute(Database.BatchableContext BC, List<sObject> scope) {
-        List<Id> accIds = new List<Id>();
+        List<Id> recordIds = new List<Id>();
         for (SObject obj : scope) {
-            accIds.add(obj.Id);
+            recordIds.add(obj.Id);
         }
         
         List<ContentDocumentLink> links = [
             SELECT ContentDocumentId, LinkedEntityId
             FROM ContentDocumentLink 
-            WHERE LinkedEntityId IN :accIds
+            WHERE LinkedEntityId IN :recordIds
         ];
         
         
-        Map<Id, List<ContentDocumentLink>> accountLinksMap = new Map<Id, List<ContentDocumentLink>>();
+        Map<Id, List<ContentDocumentLink>> recordLinksMap = new Map<Id, List<ContentDocumentLink>>();
         
         for (ContentDocumentLink link : links) {
-            if (!accountLinksMap.containsKey(link.LinkedEntityId)) {
-                accountLinksMap.put(link.LinkedEntityId, new List<ContentDocumentLink>());
+            if (!recordLinksMap.containsKey(link.LinkedEntityId)) {
+                recordLinksMap.put(link.LinkedEntityId, new List<ContentDocumentLink>());
             }
             
-            accountLinksMap.get(link.LinkedEntityId).add(link);
+            recordLinksMap.get(link.LinkedEntityId).add(link);
         }
         
-        System.enqueueJob(new GoogleDriveQueueableFileUploader(accountLinksMap, this.recordsFromFirstBatchMap));
+        System.enqueueJob(new GoogleDriveQueueableFileUploader(recordLinksMap, this.recordsFromFirstBatchMap));
     }
     
     global void finish(Database.BatchableContext BC) {
-        if(!accountsToUpdate.isEmpty()) {
-            Database.update(accountsToUpdate, false);
+        if(!recordsToUpdate.isEmpty()) {
+            Database.update(recordsToUpdate, false);
         }
     }
 }
